@@ -1,0 +1,4 @@
+# Segredos nunca entram aqui - referenciar via EnvironmentFile= apontando
+# pra fora do repo, nunca commitar o arquivo de valores em si.
+*.secret.env
+*-secrets.*

@@ -1,0 +1,7 @@
+[Unit]
+Description=Notifica falha da unit %i
+After=user@1000.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/notify-failure.sh %i

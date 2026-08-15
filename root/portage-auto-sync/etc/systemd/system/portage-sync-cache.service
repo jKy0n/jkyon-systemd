@@ -1,0 +1,8 @@
+[Unit]
+Description=Sync Portage + eix-update + cache de updates pendentes
+OnFailure=notify-failure@%n.service
+
+[Service]
+Type=oneshot
+CacheDirectory=portage-update-checker
+ExecStart=/usr/local/bin/portage-sync-and-cache.sh

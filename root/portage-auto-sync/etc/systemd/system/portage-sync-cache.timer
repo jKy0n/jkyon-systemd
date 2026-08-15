@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer B - sync diario do Portage
+
+[Timer]
+OnCalendar=Mon..Fri 16:30
+OnCalendar=Sat,Sun 10:00
+Persistent=yes
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,7 @@
+[Unit]
+Description=Suspende o sistema apos mirrorselect bem-sucedido
+OnFailure=notify-failure@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl suspend

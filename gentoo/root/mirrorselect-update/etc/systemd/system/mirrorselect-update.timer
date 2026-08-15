@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer C - mirrorselect semanal (Portage)
+
+[Timer]
+OnCalendar=Wed 04:00
+WakeSystem=yes
+Persistent=yes
+
+[Install]
+WantedBy=timers.target

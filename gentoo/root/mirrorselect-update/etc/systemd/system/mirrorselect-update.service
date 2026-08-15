@@ -1,0 +1,8 @@
+[Unit]
+Description=Atualiza lista de mirrors do Portage (mirrorselect)
+OnFailure=notify-failure@%n.service
+OnSuccess=suspend-after-mirrorselect.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/mirrorselect-update.sh

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v gitleaks &> /dev/null; then
+    echo "gitleaks nao encontrado no PATH - commit passando sem scan." >&2
+    echo "Instale com: emerge app-forensics/gitleaks (verificar categoria via 'eix -S gitleaks')" >&2
+    exit 0
+fi
+
+gitleaks protect --staged --verbose

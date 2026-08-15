@@ -117,3 +117,11 @@ ser testada em duas etapas, nessa ordem:
   atualização pendente (0 matches) não foi confirmado em execução real ainda.
   O script trata 0 e 1 como "execução válida" — validar isso da próxima vez
   que o sistema estiver 100% atualizado.
+## Setup após clonar
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Ativa o hook de pre-commit (`gitleaks`) que bloqueia commit se detectar segredo
+no staged diff. Requer `gitleaks` instalado (`eix -S gitleaks`).

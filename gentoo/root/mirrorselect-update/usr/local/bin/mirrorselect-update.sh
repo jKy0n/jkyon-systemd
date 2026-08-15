@@ -13,4 +13,5 @@ if [ ! -s "${TMP_FILE}" ]; then
 fi
 
 mv "${TMP_FILE}" "${MIRRORS_FILE}"
+chmod 644 "${MIRRORS_FILE}"
 echo "Mirrors atualizados em ${MIRRORS_FILE}"

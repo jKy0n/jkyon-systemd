@@ -125,3 +125,13 @@ git config core.hooksPath .githooks
 
 Ativa o hook de pre-commit (`gitleaks`) que bloqueia commit se detectar segredo
 no staged diff. Requer `gitleaks` instalado (`eix -S gitleaks`).
+
+### Setup do systemd-failsafe-monitor (primeira vez em cada máquina)
+
+```bash
+mkdir -p ~/.logs/systemd-failsafe-monitor ~/.cache/systemd-failsafe-monitor
+```
+
+Necessário porque `ReadWritePaths=` no sandbox exige que o diretório já
+exista no disco antes do processo iniciar — o `mkdir -p` interno do script
+roda tarde demais (depois do mount namespace já montado).

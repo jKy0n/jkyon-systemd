@@ -37,3 +37,9 @@ diretamente por uma versão atual em produção, ou por não terem valor de
 referência (testes manuais, experimentos de app específico). O histórico
 delas continua acessível via `git log` do repositório `~/ShellScript`, que
 não teve seu histórico apagado.
+
+## Adicionado depois
+
+| Unit | Papel |
+|---|---|
+| `auto-suspend.service` | Suspensão por inatividade via `xidlehook` (X11). Predecessor direto do `niri-swayidle.service` (já ativo em `shared/user/niri-session/`), que faz o mesmo com `swayidle` sob Wayland. |

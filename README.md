@@ -117,6 +117,7 @@ ser testada em duas etapas, nessa ordem:
   atualização pendente (0 matches) não foi confirmado em execução real ainda.
   O script trata 0 e 1 como "execução válida" — validar isso da próxima vez
   que o sistema estiver 100% atualizado.
+
 ## Setup após clonar
 
 ```bash

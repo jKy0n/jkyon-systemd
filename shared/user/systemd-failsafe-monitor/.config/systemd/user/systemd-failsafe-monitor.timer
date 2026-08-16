@@ -1,0 +1,11 @@
+[Unit]
+Description=Systemd Failsafe Monitor Timer
+Documentation=man:systemd.timer(5)
+Requires=systemd-failsafe-monitor.service
+[Timer]
+OnBootSec=10s
+OnUnitActiveSec=30s
+Persistent=true
+AccuracySec=5s
+[Install]
+WantedBy=timers.target

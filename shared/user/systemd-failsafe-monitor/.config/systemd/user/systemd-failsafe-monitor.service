@@ -1,0 +1,34 @@
+[Unit]
+Description=Systemd Failsafe Monitor (units sem OnFailure proprio)
+Documentation=man:systemctl(1)
+After=dbus.service
+PartOf=systemd-failsafe-monitor.timer
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/systemd-failsafe-monitor.sh
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=systemd-failsafe-monitor
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="DISPLAY=:0"
+Environment="DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/%U/bus"
+PrivateTmp=yes
+NoNewPrivileges=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+PrivateDevices=yes
+ProtectHostname=yes
+ProtectClock=yes
+ProtectKernelLogs=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.logs/systemd-failsafe-monitor %h/.cache/systemd-failsafe-monitor
+[Install]
+WantedBy=timers.target

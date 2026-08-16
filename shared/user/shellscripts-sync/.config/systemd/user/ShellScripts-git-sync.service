@@ -1,0 +1,5 @@
+[Unit]
+Description=Atualiza o repositório ShellScript via git pull
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/ShellScripts-git-sync.sh

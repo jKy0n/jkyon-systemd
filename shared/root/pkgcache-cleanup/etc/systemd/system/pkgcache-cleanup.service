@@ -1,0 +1,10 @@
+[Unit]
+Description=jKyon Universal Package Cache Cleanup (pacman/portage)
+After=network.target
+OnFailure=notify-failure@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/pkgcache-cleanup.sh
+Nice=19
+IOSchedulingClass=idle

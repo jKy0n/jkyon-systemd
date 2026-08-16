@@ -2,7 +2,6 @@
 Description=niri-* naming wrapper — inicia waybar.service somente sob niri (não duplica ExecStart; ver theseusmachine.md)
 ConditionEnvironment=XDG_CURRENT_DESKTOP=niri
 Wants=waybar.service
-After=waybar.service
 PartOf=graphical-session.target
 Requisite=graphical-session.target
 

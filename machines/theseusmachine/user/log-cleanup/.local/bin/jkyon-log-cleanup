@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOG_ROOT="${HOME}/.logs"
+
+mkdir -p "${LOG_ROOT}"
+
+# 1) apaga logs muito antigos por categoria
+find "${LOG_ROOT}/picom"          -type f -name '*.log*' -mtime +7  -delete 2>/dev/null || true
+find "${LOG_ROOT}/awesome"        -type f -name '*.log*' -mtime +14 -delete 2>/dev/null || true
+find "${LOG_ROOT}/systemd-monitor" -type f -name '*.log*' -mtime +7  -delete 2>/dev/null || true
+find "${LOG_ROOT}/borg-ui"        -type f -name '*.log*' -mtime +30 -delete 2>/dev/null || true
+find "${LOG_ROOT}/borgBackup"     -type f -name '*.log*' -mtime +30 -delete 2>/dev/null || true
+
+# 2) trunca logs grandes demais
+truncate_if_big() {
+    local file="$1"
+    local max_kib="$2"
+
+    [ -f "$file" ] || return 0
+
+    local size_kib
+    size_kib=$(du -k "$file" | awk '{print $1}')
+
+    if [ "${size_kib}" -gt "${max_kib}" ]; then
+        mv "$file" "${file}.$(date +%F-%H%M%S).old"
+        : > "$file"
+    fi
+}
+
+truncate_if_big "${LOG_ROOT}/picom/picom.log" 1024
+truncate_if_big "${LOG_ROOT}/awesome/awesome.log" 512
+truncate_if_big "${LOG_ROOT}/awesome/debug.log" 512
+
+# 3) apaga arquivos .old antigos
+find "${LOG_ROOT}" -type f -name '*.old' -mtime +14 -delete 2>/dev/null || true

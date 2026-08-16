@@ -1,0 +1,6 @@
+[Unit]
+Description=Clean old user logs under ~/.logs
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/jkyon-log-cleanup

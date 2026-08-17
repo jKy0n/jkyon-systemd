@@ -20,16 +20,28 @@ import subprocess
 import sys
 from datetime import datetime
 
-LINE_RE = re.compile(r'^\[U\] (\S+) \((.*)\): (.*)$')
+# "[U?]" acontece com pacotes de slot versionado (ex: sys-kernel/*-sources)
+# onde o eix tem incerteza na comparação - sem o "?" opcional aqui essas
+# linhas eram silenciosamente descartadas (nunca apareciam no cache).
+LINE_RE = re.compile(r'^\[U\??\] (\S+) \((.*)\): (.*)$')
 TOKEN_RE = re.compile(r'^([^\s(){}@^]+)(?:\(([^)]*)\))?')
+# "(~)" na frente da versão = só disponível em ~arch (testing/unstable),
+# precisaria de package.accept_keywords pra instalar.
+UNSTABLE_PREFIX_RE = re.compile(r'^\(~\)')
 
 
 def parse_token(tok: str):
+    is_testing = bool(UNSTABLE_PREFIX_RE.match(tok))
+    tok = UNSTABLE_PREFIX_RE.sub('', tok)
     m = TOKEN_RE.match(tok)
+    if m is None:
+        # Formato de token não reconhecido - não derruba o resto do
+        # parsing, só esse token específico fica de fora da comparação.
+        return None, None, False
     version = m.group(1)
     slot = m.group(2) if m.group(2) else "0"
     primary_slot = slot.split('/')[0]
-    return version, primary_slot
+    return version, primary_slot, is_testing
 
 
 def parse_line(line: str):
@@ -40,24 +52,32 @@ def parse_line(line: str):
     if ' -> ' not in body:
         return None
     installed_str, available_str = body.split(' -> ', 1)
-    inst_version, inst_slot = parse_token(installed_str)
+    inst_version, inst_slot, _ = parse_token(installed_str)
+    if inst_version is None:
+        return f"{pkg}: (versao instalada em formato nao reconhecido)"
+
     avail_tokens = available_str.split()
 
     matched_version = None
+    matched_testing = False
     for tok in avail_tokens:
-        v, s = parse_token(tok)
+        v, s, testing = parse_token(tok)
+        if v is None:
+            continue
         if s == inst_slot:
             matched_version = v
+            matched_testing = testing
             break
 
     if matched_version is None:
         # Nenhuma slot igual à instalada encontrada nos disponíveis.
-        # Caso raro, não observado nos dados reais até agora.
         return f"{pkg}: {inst_version} (new slot)"
 
     if matched_version == inst_version:
         return f"{pkg}: {inst_version} (new slot)"
-    return f"{pkg}: {inst_version} -> {matched_version}"
+
+    suffix = " (~testing)" if matched_testing else ""
+    return f"{pkg}: {inst_version} -> {matched_version}{suffix}"
 
 
 def run_eix_u() -> str:
@@ -66,11 +86,6 @@ def run_eix_u() -> str:
         capture_output=True,
         text=True,
     )
-    # NOTA: ainda não confirmado em execução real qual código de saída o
-    # eix devolve quando não há NENHUMA atualização pendente (0 matches).
-    # Tratamos aqui 0 e 1 como "execução válida" (com ou sem resultados);
-    # qualquer outro código é erro de verdade. Isso precisa ser validado
-    # rodando de propósito numa máquina sem updates pendentes.
     if result.returncode not in (0, 1):
         raise RuntimeError(
             f"eix -cu falhou (exit {result.returncode}): {result.stderr.strip()}"

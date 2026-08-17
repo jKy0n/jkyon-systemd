@@ -136,3 +136,15 @@ mkdir -p ~/.logs/systemd-failsafe-monitor ~/.cache/systemd-failsafe-monitor
 Necessário porque `ReadWritePaths=` no sandbox exige que o diretório já
 exista no disco antes do processo iniciar — o `mkdir -p` interno do script
 roda tarde demais (depois do mount namespace já montado).
+
+## Cuidado ao mover/renomear pacote já habilitado
+
+`stow` só gerencia os symlinks dentro do próprio pacote (`etc/systemd/system/*.service`,
+etc). Os symlinks de **habilitação** (`*.target.wants/`, criados por `systemctl enable`)
+são gerenciados pelo systemd, separadamente — `stow -D`/restow NUNCA toca neles.
+
+Se mover/renomear um pacote que já tinha unit **enabled**, sempre `disable` antes de
+mexer na estrutura, e `enable --now` de novo depois — nunca confiar que restow +
+daemon-reload sozinho restaura a habilitação. Sintoma do bug: `systemctl status
+<unit>` acusa "could not be found" mesmo com o arquivo existindo e correto em
+`/etc/systemd/system/`.

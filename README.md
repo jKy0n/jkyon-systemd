@@ -161,3 +161,22 @@ Se a habilitação (`*.target.wants/`) quebrar (ex: depois de mover/renomear pac
 ver seção acima), o conserto certo é: `stow` recria o link base -> `daemon-reload`
 -> `enable --now`. NUNCA rodar `disable` como parte do conserto - ele apaga o
 próprio link que você está tentando consertar.
+
+## Exceção: /etc/sudoers.d não é gerenciado via stow
+
+`sudoers.d` exige arquivo real, dono `root`, permissão `0440` — um symlink
+do stow (dono `jkyon`) nunca serve, independente de suporte a symlink do
+sudo. Esse é o único tipo de arquivo do projeto tratado fora do repo.
+
+**Setup manual, uma vez por máquina** (necessário pro hook pós-upgrade
+em `upgrade-portage.sh` não pedir senha de novo se o merge demorar mais
+que o cache do sudo):
+
+```bash
+sudo visudo -f /etc/sudoers.d/portage-cache-refresh
+```
+
+Conteúdo:
+```
+jkyon ALL=(root) NOPASSWD: /usr/local/bin/refresh-portage-cache.sh
+```

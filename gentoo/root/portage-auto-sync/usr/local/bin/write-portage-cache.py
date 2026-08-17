@@ -2,9 +2,10 @@
 """
 write-portage-cache.py
 
-Roda 'eix -cu', faz parse da saída e grava um cache JSON com os pacotes
-que têm atualização disponível. Pensado pra ser chamado pelo Timer B,
-DEPOIS de 'emerge --sync' e 'eix-update' já terem rodado.
+Roda 'emerge --pretend' e grava um cache JSON com os pacotes que seriam
+merged de verdade (respeitando dependência real, slot, USE, etc — não é
+mais aproximação via eix). Pensado pra ser chamado pelo Timer B, DEPOIS
+de 'emerge --sync' já ter rodado.
 
 Uso:
     write-portage-cache.py [caminho-de-saida]
@@ -20,83 +21,99 @@ import subprocess
 import sys
 from datetime import datetime
 
-# "[U?]" acontece com pacotes de slot versionado (ex: sys-kernel/*-sources)
-# onde o eix tem incerteza na comparação - sem o "?" opcional aqui essas
-# linhas eram silenciosamente descartadas (nunca apareciam no cache).
-LINE_RE = re.compile(r'^\[U\??\] (\S+) \((.*)\): (.*)$')
-TOKEN_RE = re.compile(r'^([^\s(){}@^]+)(?:\(([^)]*)\))?')
-# "(~)" na frente da versão = só disponível em ~arch (testing/unstable),
-# precisaria de package.accept_keywords pra instalar.
-UNSTABLE_PREFIX_RE = re.compile(r'^\(~\)')
+VERSION_FULL_RE = re.compile(
+    r'^\d+(?:\.\d+)*[a-z]?(?:_(?:alpha|beta|pre|rc|p)\d*)*(?:-r\d+)?$'
+)
+LINE_RE = re.compile(r'^\[ebuild(?P<flags>[^\]]*)\]\s+(?P<rest>.+)$')
 
 
-def parse_token(tok: str):
-    is_testing = bool(UNSTABLE_PREFIX_RE.match(tok))
-    tok = UNSTABLE_PREFIX_RE.sub('', tok)
-    m = TOKEN_RE.match(tok)
-    if m is None:
-        # Formato de token não reconhecido - não derruba o resto do
-        # parsing, só esse token específico fica de fora da comparação.
-        return None, None, False
-    version = m.group(1)
-    slot = m.group(2) if m.group(2) else "0"
-    primary_slot = slot.split('/')[0]
-    return version, primary_slot, is_testing
+def split_name_version(pkg_part: str):
+    """pkg_part = 'name-version' (sem categoria/repo/slot). Retorna (name, version)."""
+    segments = pkg_part.split('-')
+    for i in range(len(segments) - 1, 0, -1):
+        candidate = '-'.join(segments[i:])
+        if VERSION_FULL_RE.match(candidate):
+            return '-'.join(segments[:i]), candidate
+    return pkg_part, None
 
 
-def parse_line(line: str):
+def split_leading_bracket(s: str):
+    s = s.lstrip()
+    if s.startswith('['):
+        end = s.index(']')
+        return s[1:end], s[end + 1:].lstrip()
+    return None, s
+
+
+def strip_slot_repo(atom_part: str) -> str:
+    if '::' in atom_part:
+        atom_part = atom_part.split('::', 1)[0]
+    if ':' in atom_part:
+        atom_part = atom_part.split(':', 1)[0]
+    return atom_part
+
+
+def parse_emerge_line(line: str):
     m = LINE_RE.match(line)
     if not m:
         return None
-    pkg, body, _desc = m.groups()
-    if ' -> ' not in body:
+    flags_raw = m.group('flags')
+    rest = m.group('rest')
+
+    if ' ' not in rest:
         return None
-    installed_str, available_str = body.split(' -> ', 1)
-    inst_version, inst_slot, _ = parse_token(installed_str)
-    if inst_version is None:
-        return f"{pkg}: (versao instalada em formato nao reconhecido)"
+    new_atom, rest = rest.split(None, 1)
+    old_atom, _rest = split_leading_bracket(rest)
 
-    avail_tokens = available_str.split()
+    flags_clean = re.sub(r'\s+', '', flags_raw)
 
-    matched_version = None
-    matched_testing = False
-    for tok in avail_tokens:
-        v, s, testing = parse_token(tok)
-        if v is None:
-            continue
-        if s == inst_slot:
-            matched_version = v
-            matched_testing = testing
-            break
+    if '/' not in new_atom:
+        return None
+    cat, pkg_part = new_atom.split('/', 1)
+    pkg_part = strip_slot_repo(pkg_part)
+    name, new_version = split_name_version(pkg_part)
+    if new_version is None:
+        return None
+    full_name = f"{cat}/{name}"
 
-    if matched_version is None:
-        # Nenhuma slot igual à instalada encontrada nos disponíveis.
-        return f"{pkg}: {inst_version} (new slot)"
+    old_version = None
+    if old_atom:
+        stripped = strip_slot_repo(old_atom)
+        old_version = stripped if VERSION_FULL_RE.match(stripped) else split_name_version(stripped)[1]
 
-    if matched_version == inst_version:
-        return f"{pkg}: {inst_version} (new slot)"
-
-    suffix = " (~testing)" if matched_testing else ""
-    return f"{pkg}: {inst_version} -> {matched_version}{suffix}"
+    if old_version:
+        return f"[{flags_clean}] {full_name}: {old_version} -> {new_version}"
+    return f"[{flags_clean}] {full_name}: {new_version}"
 
 
-def run_eix_u() -> str:
+def run_emerge_pretend() -> str:
     result = subprocess.run(
-        ["eix", "-cu"],
+        [
+            "emerge", "--pretend", "--update", "--newuse",
+            "--deep", "--color=n", "--nospinner", "@world",
+        ],
         capture_output=True,
         text=True,
     )
-    if result.returncode not in (0, 1):
+    # NOTA: comportamento assumido, ainda nao confirmado em execucao real:
+    # --pretend deveria sempre retornar exit 0 quando a resolucao de
+    # dependencia teve sucesso, independente de "Total: 0 packages" ou
+    # "Total: N packages" - o exit code so deveria refletir erro de
+    # resolucao (atom invalido, blocker nao resolvido, etc), nao a
+    # quantidade de pacotes encontrados. Precisa validar isso rodando
+    # de proposito num momento com 0 pendencias.
+    if result.returncode != 0:
         raise RuntimeError(
-            f"eix -cu falhou (exit {result.returncode}): {result.stderr.strip()}"
+            f"emerge --pretend falhou (exit {result.returncode}): "
+            f"{result.stderr.strip()[-500:]}"
         )
     return result.stdout
 
 
-def build_cache(eix_output: str) -> dict:
+def build_cache(emerge_output: str) -> dict:
     packages = []
-    for line in eix_output.splitlines():
-        parsed = parse_line(line)
+    for line in emerge_output.splitlines():
+        parsed = parse_emerge_line(line)
         if parsed is not None:
             packages.append(parsed)
     packages.sort()
@@ -122,8 +139,8 @@ def main():
             sys.exit(1)
         out_path = os.path.join(cache_dir, "status.json")
 
-    eix_output = run_eix_u()
-    cache = build_cache(eix_output)
+    emerge_output = run_emerge_pretend()
+    cache = build_cache(emerge_output)
 
     with open(out_path, "w") as f:
         json.dump(cache, f, indent=2, ensure_ascii=False)

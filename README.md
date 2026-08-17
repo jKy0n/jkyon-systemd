@@ -148,3 +148,16 @@ mexer na estrutura, e `enable --now` de novo depois — nunca confiar que restow
 daemon-reload sozinho restaura a habilitação. Sintoma do bug: `systemctl status
 <unit>` acusa "could not be found" mesmo com o arquivo existindo e correto em
 `/etc/systemd/system/`.
+
+## systemctl disable é destrutivo em unit stow-linked - NUNCA usar como primeiro passo
+
+Unit gerenciada via stow aparece como `UnitFileState=linked` no `systemctl status`
+(não `static`/`enabled`/`disabled` normal) - porque o symlink em
+`/etc/systemd/system/` aponta pra fora do caminho de busca padrão. Nessa condição,
+`systemctl disable` remove o symlink **inteiro**, não só a entrada em
+`*.target.wants/`.
+
+Se a habilitação (`*.target.wants/`) quebrar (ex: depois de mover/renomear pacote,
+ver seção acima), o conserto certo é: `stow` recria o link base -> `daemon-reload`
+-> `enable --now`. NUNCA rodar `disable` como parte do conserto - ele apaga o
+próprio link que você está tentando consertar.

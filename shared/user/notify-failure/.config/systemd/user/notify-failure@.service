@@ -1,0 +1,8 @@
+[Unit]
+Description=Notificação: falha na unidade %i
+
+[Service]
+Type=oneshot
+ExecStart=notify-send --urgency=critical -i /usr/share/icons/Papirus/48x48/status/dialog-error.svg \
+  "Falha: %i" \
+  "Rode: journalctl --user -u %i -e"

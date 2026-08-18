@@ -5,7 +5,8 @@
 #        Path:       ~/.local/bin/git-sync-all.sh
 #        Notes:      Shared entre toda a frota — o remote não importa pro pull,
 #                     só o path local. Repo ausente ou não-git (ex: dotfiles do
-#                     Builder, ainda em yadm) é pulado, não é falha.
+#                     Builder, ainda em yadm) é pulado, não é falha. Pull explícito
+#                     (origin + branch atual) em vez de tracking implícito.
 #
 
 set -u
@@ -62,7 +63,14 @@ for entry in "${REPOS[@]}"; do
     [[ -d "$path" ]] || continue
     git -C "$path" rev-parse --git-dir >/dev/null 2>&1 || continue
 
-    output="$(git -C "$path" pull --ff-only 2>&1)"
+    branch="$(git -C "$path" symbolic-ref --short HEAD 2>/dev/null)"
+    if [[ -z "$branch" ]]; then
+        log_error "$repo_name" "não foi possível resolver o branch atual (detached HEAD?)"
+        FAILED+=("$repo_name")
+        continue
+    fi
+
+    output="$(git -C "$path" pull --ff-only origin "$branch" 2>&1)"
     status=$?
 
     if (( status != 0 )); then

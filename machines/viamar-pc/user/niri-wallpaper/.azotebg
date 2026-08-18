@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+pkill swaybg
+swaybg -o 'HDMI-A-1' -i "/home/jkyon/.local/share/azote/backgrounds-sway/part0-atena.jpeg" -m fill &
+swaybg -o 'DP-1' -i "/home/jkyon/.local/share/azote/backgrounds-sway/part1-atena.jpeg" -m fill &

@@ -1,0 +1,7 @@
+[Unit]
+Description=jKyon Git Repos Sync (ai-context, dotfiles, nvim, ShellScript, systemd, terminal)
+OnFailure=notify-failure@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/git-sync-all.sh

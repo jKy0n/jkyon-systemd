@@ -1,5 +1,5 @@
 [Unit]
-Description=Executa ShellScripts-git-sync periodicamente
+Description=Executa git-sync-all periodicamente
 
 [Timer]
 OnStartupSec=5min

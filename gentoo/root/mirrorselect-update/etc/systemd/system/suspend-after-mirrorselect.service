@@ -1,6 +1,6 @@
 [Unit]
 Description=Suspende o sistema apos mirrorselect bem-sucedido
-OnFailure=notify-failure@%n.service
+OnFailure=notify-failure@%N.service
 
 [Service]
 Type=oneshot

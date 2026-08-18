@@ -1,6 +1,6 @@
 [Unit]
 Description=Sync Portage + eix-update + cache de updates pendentes
-OnFailure=notify-failure@%n.service
+OnFailure=notify-failure@%N.service
 
 [Service]
 Type=oneshot

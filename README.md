@@ -53,7 +53,7 @@ máquina, ao aplicar, só roda `stow` nos escopos que fazem sentido pra ela
 
 | Pacote | Escopo | O que faz |
 |---|---|---|
-| `notify-failure` | `shared/root/` | Infra compartilhada: dispara notificação crítica (ponte pro DBus de sessão do usuário) quando qualquer unit referenciar `OnFailure=notify-failure@%n.service` |
+| `notify-failure` | `shared/root/` | Infra compartilhada: dispara notificação crítica (ponte pro DBus de sessão do usuário) quando qualquer unit referenciar `OnFailure=notify-failure@%N.service` |
 | `portage-auto-sync` | `gentoo/root/` | Timer B: sync diário do Portage + eix-update + cache JSON de pacotes desatualizados, consumido pela waybar via signal |
 | `mirrorselect-update` | `gentoo/root/` | Timer C: mirrorselect semanal (quarta 04h), com wake-from-suspend e auto-suspend após sucesso |
 
@@ -63,7 +63,7 @@ máquina, ao aplicar, só roda `stow` nos escopos que fazem sentido pra ela
   timer futuro que precise sinalizar a waybar deve usar um número **diferente**
   de 8, pra não colidir.
 - **Notificação de falha**: toda `.service` que rode desatendido (via timer)
-  deve ter `OnFailure=notify-failure@%n.service`.
+  deve ter `OnFailure=notify-failure@%N.service`.
 - **Cache em `/var/cache/`**: dados regeneráveis (JSON de status, etc.) usam
   `CacheDirectory=` na unit, nunca caminho hardcoded — evita problema de
   permissão e centraliza a limpeza.

@@ -1,6 +1,6 @@
 [Unit]
 Description=Atualiza lista de mirrors do Portage (mirrorselect)
-OnFailure=notify-failure@%n.service
+OnFailure=notify-failure@%N.service
 OnSuccess=suspend-after-mirrorselect.service
 
 [Service]

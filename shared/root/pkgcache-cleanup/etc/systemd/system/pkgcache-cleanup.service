@@ -1,7 +1,7 @@
 [Unit]
 Description=jKyon Universal Package Cache Cleanup (pacman/portage)
 After=network.target
-OnFailure=notify-failure@%n.service
+OnFailure=notify-failure@%N.service
 
 [Service]
 Type=oneshot

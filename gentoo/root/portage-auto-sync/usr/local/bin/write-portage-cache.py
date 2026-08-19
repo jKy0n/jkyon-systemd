@@ -95,13 +95,6 @@ def run_emerge_pretend() -> str:
         capture_output=True,
         text=True,
     )
-    # NOTA: comportamento assumido, ainda nao confirmado em execucao real:
-    # --pretend deveria sempre retornar exit 0 quando a resolucao de
-    # dependencia teve sucesso, independente de "Total: 0 packages" ou
-    # "Total: N packages" - o exit code so deveria refletir erro de
-    # resolucao (atom invalido, blocker nao resolvido, etc), nao a
-    # quantidade de pacotes encontrados. Precisa validar isso rodando
-    # de proposito num momento com 0 pendencias.
     if result.returncode != 0:
         raise RuntimeError(
             f"emerge --pretend falhou (exit {result.returncode}): "
@@ -113,7 +106,15 @@ def run_emerge_pretend() -> str:
 def build_cache(emerge_output: str) -> dict:
     packages = []
     for line in emerge_output.splitlines():
-        parsed = parse_emerge_line(line)
+        try:
+            parsed = parse_emerge_line(line)
+        except Exception as exc:
+            print(
+                f"Aviso: linha nao pode ser interpretada, pulando: "
+                f"{line!r} ({type(exc).__name__}: {exc})",
+                file=sys.stderr,
+            )
+            continue
         if parsed is not None:
             packages.append(parsed)
     packages.sort()

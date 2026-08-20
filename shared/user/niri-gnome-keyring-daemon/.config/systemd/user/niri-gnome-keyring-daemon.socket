@@ -1,0 +1,9 @@
+[Unit]
+Description=GNOME Keyring daemon control socket
+
+[Socket]
+ListenStream=%t/keyring/control
+DirectoryMode=0700
+
+[Install]
+WantedBy=sockets.target

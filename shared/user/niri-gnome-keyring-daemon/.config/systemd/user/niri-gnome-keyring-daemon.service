@@ -1,8 +1,7 @@
 [Unit]
 Description=GNOME Keyring Daemon
-After=graphical-session.target
-Requisite=graphical-session.target
 PartOf=graphical-session.target
+Requires=niri-gnome-keyring-daemon.socket
 
 [Service]
 Type=simple
@@ -11,4 +10,4 @@ Restart=on-failure
 RestartSec=5
 
 [Install]
-WantedBy=graphical-session.target
+Also=niri-gnome-keyring-daemon.socket

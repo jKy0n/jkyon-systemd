@@ -72,6 +72,14 @@ máquina, ao aplicar, só roda `stow` nos escopos que fazem sentido pra ela
   diretório primeiro, valida o conteúdo, só então usa `mv` pra trocar.
   Lembrar de restaurar a permissão certa depois do `mv` (`mktemp` cria `0600`
   por padrão, config normalmente precisa de `0644`).
+- **Escopo de `jkyon-smart-cache-cleanup` (`shared/user/`)**: revisado após a
+  decisão de "cache universal" ser fechada (BtrFS + `chattr +C` pra
+  `~/.cache` e `~/.builds`, ver `AGENTS.md` do `jkyon-ai-context`). `~/.builds`
+  fica **deliberadamente** fora do escopo desse script — a limpeza de
+  distfiles/binpkgs já é feita por `eclean-dist`/`eclean-pkg`
+  (`app-portage/gentoolkit`), que tem lógica própria de retenção contra a
+  árvore de ebuilds atual. Um `find -atime -delete` genérico não deve mexer
+  lá.
 
 ## Aplicando um pacote
 

@@ -2,7 +2,7 @@
 #
 #       Title:      smart-cache-cleanup.sh
 #       Brief:      List or delete old temporary files in specified categories.
-#       Path:       /home/jkyon/ShellScript/Tools/smart-cache-cleanup/smart-cache-cleanup.sh
+#       Path:       shared/user/jkyon-smart-cache-cleanup/.local/bin/smart-cache-cleanup.sh (jkyon-systemd)
 #       Author:     John Kennedy a.k.a. jKyon
 #       Created:    2026-06-08
 #       Updated:    2026-06-08

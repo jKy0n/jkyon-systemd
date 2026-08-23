@@ -1,0 +1,6 @@
+[Unit]
+Description=Backup do Postgres do Atuin (Builder) para Viamar-PC
+OnFailure=notify-failure@%N.service
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/atuin-backup-builder.sh

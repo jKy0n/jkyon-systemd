@@ -1,0 +1,7 @@
+[Unit]
+Description=Timer diário do backup Atuin (Builder)
+[Timer]
+OnCalendar=*-*-* 20:30:00
+Persistent=true
+[Install]
+WantedBy=timers.target

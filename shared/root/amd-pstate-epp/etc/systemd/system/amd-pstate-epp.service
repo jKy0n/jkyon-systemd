@@ -1,4 +1,3 @@
-# /etc/systemd/system/amd-pstate-epp.service
 [Unit]
 Description=Define EPP (balance_power) no amd-pstate-epp após boot
 After=multi-user.target

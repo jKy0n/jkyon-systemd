@@ -1,5 +1,5 @@
 [Unit]
-Description=Timer diário do backup Atuin (Viamar-PC)
+Description=Timer diário do backup Atuin (Builder)
 [Timer]
 OnCalendar=*-*-* 19:30:00
 Persistent=true

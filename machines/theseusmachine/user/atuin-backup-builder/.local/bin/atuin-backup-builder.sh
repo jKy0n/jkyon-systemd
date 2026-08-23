@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Backup do Postgres do Atuin (self-hosted em Viamar-PC) -> TheseusMachine
+# Backup do Postgres do Atuin (self-hosted no Builder) -> TheseusMachine
 # Pull via SSH não-interativo, dump comprimido, retenção de 14 dias.
 set -euo pipefail
 
-DEST="/mnt/backup/atuin-viamar"
+DEST="/mnt/backup/atuin-builder"
 TS="$(date +%Y-%m-%d_%H-%M)"
-KEY="$HOME/.ssh/theseus_to_viamar-backup-auto"
-REMOTE="jkyon@100.100.10.20"
+KEY="$HOME/.ssh/theseus_to_builder-backup-auto"
+REMOTE="jkyon@100.100.10.50"
 
 mkdir -p "$DEST"
 

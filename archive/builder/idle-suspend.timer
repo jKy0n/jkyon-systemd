@@ -1,0 +1,11 @@
+# /etc/systemd/system/idle-suspend.timer
+[Unit]
+Description=Timer de verificação de ociosidade
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=5min
+Unit=idle-suspend.service
+
+[Install]
+WantedBy=timers.target

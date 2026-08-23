@@ -1,0 +1,7 @@
+# /etc/systemd/system/idle-suspend.service
+[Unit]
+Description=Verifica ociosidade do Builder
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/check-idle-suspend.sh

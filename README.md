@@ -56,6 +56,7 @@ máquina, ao aplicar, só roda `stow` nos escopos que fazem sentido pra ela
 | `notify-failure` | `shared/root/` | Infra compartilhada: dispara notificação crítica (ponte pro DBus de sessão do usuário) quando qualquer unit referenciar `OnFailure=notify-failure@%N.service` |
 | `portage-auto-sync` | `gentoo/root/` | Timer B: sync diário do Portage + eix-update + cache JSON de pacotes desatualizados, consumido pela waybar via signal |
 | `mirrorselect-update` | `gentoo/root/` | Timer C: mirrorselect semanal (quarta 04h), com wake-from-suspend e auto-suspend após sucesso |
+| `pkgcache-cleanup` | `shared/root/` | Limpeza universal de cache de pacotes (pacman `paccache -rk2`/`-ruk0` ou portage `eclean`), semanal (domingo 03:30), com notificação via DBus |
 
 ## Convenções
 

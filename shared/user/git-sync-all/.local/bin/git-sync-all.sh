@@ -22,7 +22,7 @@ REPOS=(
     "$HOME/.config/nvim:nvim"
     "$HOME/ShellScript:ShellScript"
     "$HOME/.jkyon-systemd:systemd"
-    "$HOME/.jKy0n-terminal:terminal"
+    "$HOME/.jkyon-terminal:terminal"
 )
 
 timestamp() { date '+%Y-%m-%d %H:%M:%S'; }

@@ -1,0 +1,13 @@
+[Unit]
+Description=Wait for Tailscale to be ready
+After=network-online.target tailscaled.service
+Wants=network-online.target tailscaled.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'until ping -c1 -W1 100.100.10.10 >/dev/null 2>&1 || ping -c1 -W1 100.100.10.20 >/dev/null 2>&1; do sleep 1; done'
+RemainAfterExit=yes
+TimeoutStartSec=30
+
+[Install]
+WantedBy=remote-fs.target

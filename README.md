@@ -60,9 +60,13 @@ máquina, ao aplicar, só roda `stow` nos escopos que fazem sentido pra ela
 
 ## Convenções
 
-- **Signal da waybar**: `portage-auto-sync` usa `pkill -RTMIN+8 waybar`. Qualquer
-  timer futuro que precise sinalizar a waybar deve usar um número **diferente**
-  de 8, pra não colidir.
+- **Signal da waybar**: `portage-auto-sync` (TheseusMachine) usa `pkill -RTMIN+8 waybar`.
+  O módulo `custom/updates` da Viamar-PC (contador de updates pacman/AUR, polling
+  direto no `interval` do módulo, sem timer systemd — script em
+  `viamar-pc-dotfiles/config/waybar/scripts/updates-monitor.sh`, hook em
+  `ShellScript/Viamar-PC/upgradeParu.sh`) usa `pkill -RTMIN+9 waybar`. Qualquer
+  timer/hook futuro que precise sinalizar a waybar deve usar um número
+  **diferente** de 8 e 9, pra não colidir.
 - **Notificação de falha**: toda `.service` que rode desatendido (via timer)
   deve ter `OnFailure=notify-failure@%N.service`.
 - **Cache em `/var/cache/`**: dados regeneráveis (JSON de status, etc.) usam

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 pkill swaybg
-swaybg -o 'HDMI-A-1' -i "/home/jkyon/.local/share/azote/backgrounds-sway/part0-night-sky-mountain-landscape-cartoon-illustration.jpg" -m fill &
-swaybg -o 'DP-1' -i "/home/jkyon/.local/share/azote/backgrounds-sway/part1-night-sky-mountain-landscape-cartoon-illustration.jpg" -m fill &
-swaybg -o 'HDMI-A-2' -i "/home/jkyon/.local/share/azote/backgrounds-sway/part2-night-sky-mountain-landscape-cartoon-illustration.jpg" -m fill &
+swaybg -o 'HDMI-A-1' -i "/home/jkyon/Pictures/Wallpapers/LinuxWallpapers/gentoo.png" -m fill &
+swaybg -o 'DP-1' -i "/home/jkyon/Pictures/Wallpapers/LinuxWallpapers/gentoo.png" -m fill &
+swaybg -o 'HDMI-A-2' -i "/home/jkyon/Pictures/Wallpapers/LinuxWallpapers/gentoo.png" -m fill &

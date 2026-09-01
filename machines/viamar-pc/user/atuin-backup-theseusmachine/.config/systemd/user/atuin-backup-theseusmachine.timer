@@ -1,5 +1,5 @@
 [Unit]
-Description=Timer diário do backup Atuin (Builder)
+Description=Timer diário do backup Atuin (TheseusMachine)
 [Timer]
 OnCalendar=*-*-* 20:30:00
 Persistent=true

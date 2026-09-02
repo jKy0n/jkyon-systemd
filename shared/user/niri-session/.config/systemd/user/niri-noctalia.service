@@ -1,11 +1,11 @@
 [Unit]
-Description=Mako notification daemon
+Description=Noctalia shell (bar, notifications, wallpaper, control center)
 After=graphical-session.target
 Requisite=graphical-session.target
 PartOf=graphical-session.target
 
 [Service]
-ExecStart=/usr/bin/mako
+ExecStart=/usr/bin/noctalia
 Restart=on-failure
 RestartSec=3
 

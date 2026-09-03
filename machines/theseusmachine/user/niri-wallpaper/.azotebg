@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-pkill swaybg
-swaybg -o 'HDMI-A-1' -i "/home/jkyon/Pictures/Wallpapers/LinuxWallpapers/gentoo.png" -m fill &
-swaybg -o 'DP-1' -i "/home/jkyon/Pictures/Wallpapers/LinuxWallpapers/gentoo.png" -m fill &
-swaybg -o 'HDMI-A-2' -i "/home/jkyon/Pictures/Wallpapers/LinuxWallpapers/gentoo.png" -m fill &

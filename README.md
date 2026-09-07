@@ -57,8 +57,8 @@ máquina, ao aplicar, só roda `stow` nos escopos que fazem sentido pra ela
 | `portage-auto-sync` | `gentoo/root/` | Timer B: sync diário do Portage + eix-update + cache JSON de pacotes desatualizados, consumido pela waybar via signal |
 | `mirrorselect-update` | `gentoo/root/` | Timer C: mirrorselect semanal (quarta 04h), com wake-from-suspend e auto-suspend após sucesso |
 | `pkgcache-cleanup` | `shared/root/` | Limpeza universal de cache de pacotes (pacman `paccache -rk2`/`-ruk0` ou portage `eclean`), semanal (domingo 03:30), com notificação via DBus |
-| `sccache-dist-server` | `shared/root/` | Build server do cluster sccache-dist (compilação distribuída de Rust) — roda em TheseusMachine, Viamar-PC e Builder, ver `jkyon-ai-context/machines/sccache-dist.md` |
-| `sccache-dist-scheduler` | `machines/builder/root/` | Scheduler do cluster sccache-dist — só no Builder (único nó 24/7), despacha jobs pros 3 build servers |
+| `sccache-server-notify` | `shared/root/` | Drop-in (`OnFailure=`) sobre o `sccache-server.service` **package-owned** (Gentoo/Arch já instalam a unit real, USE/feature `dist-server`) — cluster sccache-dist (compilação distribuída de Rust), roda em TheseusMachine, Viamar-PC e Builder, ver `jkyon-ai-context/machines/sccache-dist.md` |
+| `sccache-scheduler-notify` | `machines/builder/root/` | Drop-in (`OnFailure=`) sobre o `sccache-scheduler.service` **package-owned** — só no Builder (único nó 24/7), despacha jobs pros 3 build servers do cluster sccache-dist |
 
 ## Convenções
 

@@ -1,0 +1,23 @@
+[Unit]
+Description=jKyon sccache-dist scheduler (Rust — compilação distribuída)
+Documentation=https://github.com/mozilla/sccache/blob/main/docs/Distributed.md
+After=network-online.target tailscaled.service
+Wants=network-online.target
+OnFailure=notify-failure@%N.service
+
+[Service]
+Type=simple
+# Config real em /etc/sccache-dist/scheduler.conf — NÃO versionado (contém
+# client_auth.token e server_auth.secret_key). Ver runbook em
+# jkyon-ai-context/machines/sccache-dist.md.
+# public_addr fica em 127.0.0.1:10600 por design — exposto pra fora só via
+# `tailscale serve` (TLS automático via cert MagicDNS), nunca direto na
+# tailnet sem HTTPS na frente (recomendação oficial do sccache-dist).
+ExecStart=/usr/bin/sccache-dist scheduler --config /etc/sccache-dist/scheduler.conf
+Environment=SCCACHE_NO_DAEMON=1
+Restart=on-failure
+RestartSec=5s
+User=root
+
+[Install]
+WantedBy=multi-user.target

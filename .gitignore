@@ -2,3 +2,6 @@
 # pra fora do repo, nunca commitar o arquivo de valores em si.
 *.secret.env
 *-secrets.*
+
+# Estado local do Claude Code (git worktrees de sessões, settings locais)
+.claude/

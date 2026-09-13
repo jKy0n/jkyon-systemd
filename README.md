@@ -57,6 +57,9 @@ máquina, ao aplicar, só roda `stow` nos escopos que fazem sentido pra ela
 | `portage-auto-sync` | `gentoo/root/` | Timer B: sync diário do Portage + eix-update + cache JSON de pacotes desatualizados, consumido pela waybar via signal |
 | `mirrorselect-update` | `gentoo/root/` | Timer C: mirrorselect semanal (quarta 04h), com wake-from-suspend e auto-suspend após sucesso |
 | `pkgcache-cleanup` | `shared/root/` | Limpeza universal de cache de pacotes (pacman `paccache -rk2`/`-ruk0` ou portage `eclean`), semanal (domingo 03:30), com notificação via DBus |
+| `sccache-server-notify` | `shared/root/` | Drop-in sobre o `sccache-server.service` **package-owned** (Gentoo/Arch já instalam a unit real, USE/feature `dist-server`) — `OnFailure=` + espera o IP do Tailscale existir antes do bind (`public_addr` é um IP do Tailscale; sem isso, um boot pode vencer a corrida e derrubar o server com "Cannot assign requested address" — aconteceu de verdade no Builder em 2026-09-12) — cluster sccache-dist (compilação distribuída de Rust), roda em TheseusMachine, Viamar-PC e Builder, ver `jkyon-ai-context/machines/sccache-dist.md` |
+| `sccache-scheduler-notify` | `machines/builder/root/` | Drop-in (`OnFailure=`) sobre o `sccache-scheduler.service` **package-owned** — só no Builder (único nó 24/7), despacha jobs pros 3 build servers do cluster sccache-dist. `public_addr` é `127.0.0.1`, não sofre a mesma corrida de boot do server/nginx |
+| `nginx-tailscale-wait` | `machines/builder/root/` | Drop-in sobre o `nginx.service` **package-owned** — só no Builder, onde o nginx termina TLS na frente do `sccache-scheduler` num IP do Tailscale (`100.100.10.50:8443`). Mesma corrida de boot do `sccache-server-notify`, mesmo fix (espera o IP existir) + `OnFailure=` |
 
 ## Convenções
 

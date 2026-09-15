@@ -1,0 +1,29 @@
+loki.relabel "journal" {
+	forward_to = []
+
+	rule {
+		source_labels = ["__journal__systemd_unit"]
+		target_label  = "unit"
+	}
+
+	rule {
+		target_label = "job"
+		replacement  = "journald"
+	}
+}
+
+loki.source.journal "system" {
+	max_age       = "12h"
+	relabel_rules = loki.relabel.journal.rules
+	forward_to    = [loki.write.central.receiver]
+}
+
+loki.write "central" {
+	endpoint {
+		url = "http://100.100.10.10:3100/loki/api/v1/push"
+	}
+
+	external_labels = {
+		hostname = sys.env("ALLOY_NODE_NAME"),
+	}
+}

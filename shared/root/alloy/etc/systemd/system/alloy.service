@@ -1,0 +1,22 @@
+[Unit]
+Description=Grafana Alloy (journald -> Loki, jKyon logging centralizado)
+Documentation=https://grafana.com/docs/alloy/
+After=network-online.target tailscaled.service
+Wants=network-online.target tailscaled.service
+OnFailure=notify-failure@%N.service
+
+[Service]
+Type=simple
+User=alloy
+Group=alloy
+Environment=ALLOY_NODE_NAME=%H
+ExecStart=/usr/local/bin/alloy run --server.http.listen-addr=127.0.0.1:12345 --storage.path=/var/lib/alloy /etc/alloy/config.alloy
+Restart=on-failure
+RestartSec=5
+StateDirectory=alloy
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

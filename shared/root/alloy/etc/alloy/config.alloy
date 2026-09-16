@@ -27,3 +27,22 @@ loki.write "central" {
 		hostname = sys.env("ALLOY_NODE_NAME"),
 	}
 }
+
+prometheus.exporter.unix "host" {
+	enable_collectors = ["systemd", "cpu", "meminfo", "diskstats", "filesystem", "netdev", "loadavg"]
+}
+
+prometheus.scrape "host_metrics" {
+	targets    = prometheus.exporter.unix.host.targets
+	forward_to = [prometheus.remote_write.central.receiver]
+}
+
+prometheus.remote_write "central" {
+	endpoint {
+		url = "http://100.100.10.10:9090/api/v1/write"
+	}
+
+	external_labels = {
+		hostname = sys.env("ALLOY_NODE_NAME"),
+	}
+}

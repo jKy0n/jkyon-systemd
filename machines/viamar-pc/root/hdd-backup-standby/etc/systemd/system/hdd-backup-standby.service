@@ -1,0 +1,10 @@
+[Unit]
+Description=Standby automático (15min idle) do HDD de backup (WD Purple)
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/hdparm -S 180 /dev/disk/by-id/ata-WDC_WD11PURZ-85C5HY0_WD-WCC4J7NXS8DN
+
+[Install]
+WantedBy=multi-user.target

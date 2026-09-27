@@ -1,0 +1,11 @@
+[Unit]
+Description=Desliga o core físico 5 (CPU 5/21) — MCE recorrente, ver jkyon-ai-context mce.md
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'echo 0 > /sys/devices/system/cpu/cpu5/online'
+ExecStart=/bin/sh -c 'echo 0 > /sys/devices/system/cpu/cpu21/online'
+
+[Install]
+WantedBy=multi-user.target

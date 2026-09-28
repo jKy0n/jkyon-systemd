@@ -1,0 +1,7 @@
+[Unit]
+Description=Standby do HDD de backup (WD Purple) após 30min sem I/O
+OnFailure=notify-failure@%N.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/hdd-backup-standby-check.sh

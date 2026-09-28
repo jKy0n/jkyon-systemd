@@ -1,0 +1,10 @@
+[Unit]
+Description=Checagem de ociosidade do HDD de backup (1min)
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1min
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target

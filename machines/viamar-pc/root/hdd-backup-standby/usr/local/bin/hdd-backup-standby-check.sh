@@ -22,13 +22,16 @@ STATE="/run/hdd-backup-standby.state"
 dev=$(readlink -f "$DISK_ID")
 [[ -b "$dev" ]] || { echo "disco não encontrado: $DISK_ID" >&2; exit 1; }
 
-# reads completed + writes completed
-io=$(awk '{print $1, $5}' "/sys/block/${dev##*/}/stat")
+# reads completed + writes completed + I/O em andamento (in_flight)
+read -r io_r io_w in_flight < <(awk '{print $1, $5, $9}' "/sys/block/${dev##*/}/stat")
+io="$io_r $io_w"
 now=$(date +%s)
 
+# in_flight > 0: leitura pendente durante spin-up ainda não aparece nos
+# contadores de "completados" — sem isso o standby cairia no meio dela.
 if [[ -f "$STATE" ]]; then
     read -r last_io_r last_io_w last_change < "$STATE"
-    if [[ "$io" != "$last_io_r $last_io_w" ]]; then
+    if [[ "$io" != "$last_io_r $last_io_w" ]] || (( in_flight > 0 )); then
         echo "$io $now" > "$STATE"
         exit 0
     fi

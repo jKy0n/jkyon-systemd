@@ -53,7 +53,7 @@ máquina, ao aplicar, só roda `stow` nos escopos que fazem sentido pra ela
 
 | Pacote | Escopo | O que faz |
 |---|---|---|
-| `notify-failure` | `shared/root/` | Infra compartilhada: dispara notificação crítica (ponte pro DBus de sessão do usuário) quando qualquer unit referenciar `OnFailure=notify-failure@%N.service` |
+| `notify-failure` | `shared/root/` | Infra compartilhada: dispara notificação crítica quando qualquer unit referenciar `OnFailure=notify-failure@%N.service`. Dois canais: desktop (ponte pro DBus de sessão do usuário, pulado sem sessão gráfica) e, desde 2026-10-03, **ntfy** opcional — só liga se existir `/etc/notify-failure/ntfy.conf` (`NTFY_URL="https://ntfy.sh/<tópico>"`, root 0600, **fora do git**: o tópico funciona como credencial). Falha só se nenhum canal entregar. Builder (headless) usa só o ntfy |
 | `portage-auto-sync` | `gentoo/root/` | Timer B: sync diário do Portage + eix-update + cache JSON de pacotes desatualizados, consumido pela waybar via signal |
 | `mirrorselect-update` | `gentoo/root/` | Timer C: mirrorselect semanal (quarta 04h), com wake-from-suspend e auto-suspend após sucesso |
 | `pkgcache-cleanup` | `shared/root/` | Limpeza universal de cache de pacotes (pacman `paccache -rk2`/`-ruk0` ou portage `eclean`), semanal (domingo 03:30), com notificação via DBus |

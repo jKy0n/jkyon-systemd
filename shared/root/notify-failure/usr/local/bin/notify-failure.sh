@@ -32,7 +32,7 @@ if [[ -r "$NTFY_CONF" ]]; then
     # shellcheck source=/dev/null
     . "$NTFY_CONF"
     curl -fsS --max-time 15 \
-        -H "Title: Falha: ${FAILED_UNIT} ($(hostname))" \
+        -H "Title: Falha: ${FAILED_UNIT} ($(uname -n))" \
         -H "Priority: high" \
         -H "Tags: rotating_light" \
         -d "Rode: journalctl -u ${FAILED_UNIT} -e" \

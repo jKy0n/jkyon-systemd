@@ -1,0 +1,15 @@
+# Só no Builder: o nginx termina TLS na frente do sccache-scheduler com um cert
+# Tailscale (Let's Encrypt, 90 dias) gerado à mão em 2026-09-07 e sem renovação
+# até 2026-10-03 — venceria em 2026-12-06 e derrubaria o cluster sccache-dist
+# inteiro (clients falam com o scheduler só via TLS). Mesmo guard de IP do
+# Tailscale do nginx-tailscale-wait: sem o tailscaled de pé, `tailscale cert` falha.
+[Unit]
+Description=Renova o cert Tailscale do nginx (sccache-scheduler)
+After=tailscaled.service nginx.service
+Wants=tailscaled.service
+OnFailure=notify-failure@%N.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sh -c 'for i in $(seq 1 60); do tailscale ip -4 >/dev/null 2>&1 && exit 0; sleep 1; done; exit 1'
+ExecStart=/usr/local/bin/nginx-tailscale-cert-renew.sh

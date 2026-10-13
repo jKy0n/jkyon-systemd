@@ -18,7 +18,7 @@ jkyon-systemd/
   ├── gentoo/ # específico de distro, qualquer máquina Gentoo
   │   ├── root/
   │   └── user/
-  ├── arch/ # específico de distro, qualquer máquina Arch (ainda vazio)
+  ├── arch/ # específico de distro, qualquer máquina Arch
   │   ├── root/
   │   └── user/
   └── machines/ # específico de UMA máquina só (ainda vazio)
@@ -67,6 +67,7 @@ máquina, ao aplicar, só roda `stow` nos escopos que fazem sentido pra ela
 | `sccache-server-cpu-limit` | `machines/<host>/root/` (Viamar-PC, Builder, TheseusMachine — 3 instâncias, mesmo pacote) | Segundo drop-in sobre `sccache-server.service.d/` (não mexe no `override.conf` do `sccache-server-notify`) — `CPUQuota=` por máquina pra reservar CPU fora do cluster (decisão 2026-09-18): 1000% na Viamar-PC e no Builder (10 de 12 núcleos cada), 3000% na TheseusMachine (30 de 32). Afeta o `num_cpus` que o server reporta no heartbeat pro scheduler — a crate `num_cpus` usada pelo sccache-dist respeita quota de cgroup (`cpu.cfs_quota_us`/`cpu.cfs_period_us`/`cgroup.controllers`, confirmado via `strings` no binário), não só afinidade |
 | `ollama-override` | `machines/theseusmachine/root/` | Drop-in sobre o `ollama.service` **package-owned** (`sci-ml/ollama`): roda como `jkyon:jkyon` com `Nice=-10`, `CPUQuota=2800%` (28 das 30 threads online), `MemoryHigh=56G` e as variáveis `OLLAMA_*` (modelos em `/mnt/VirtualMachines/LLM`). Substitui (2026-10-03) uma cópia completa da unit em `/etc/systemd/system/` que tinha comentário inline nos limites — o systemd descartava `CPUQuota`/`MemoryHigh` e o ollama rodava sem limite |
 | `mce-offline-core5` | `machines/theseusmachine/root/` | Oneshot que desliga as threads 5 e 21 (core físico 5 do 5950X) a cada boot — defeito físico com MCE recorrente no Bank 0, 0 eventos com o core desligado e ~1.500/h com ele ligado (semana 20–27/09/2026). Substitui o `echo 0` manual, esquecido 3× após reboot. Temporário: desabilitar após RMA/troca de CPU. Ver `jkyon-ai-context/machines/theseusmachine/mce.md` |
+| `glances-web-override` | `arch/root/` | Drop-in sobre o `glances-web.service` **package-owned** (`extra/glances`): web UI do Glances em `0.0.0.0:61208` pra acompanhar a máquina pelo celular (`GLANCES_ARGS=-B 0.0.0.0` + `OnFailure=`). Zera o `EnvironmentFile=` porque o `/etc/conf.d/glances` do pacote teria precedência sobre `Environment=`. Sem senha: o acesso é restrito por ufw (LAN do escritório + Tailscale). Em `arch/` por depender do formato da unit do Arch — conferir a unit do ebuild antes de levar pra TheseusMachine. Ativo na Viamar-PC desde 2026-10-13, ver `jkyon-ai-context/machines/viamar-pc/viamar-pc.md` |
 
 ## Convenções
 

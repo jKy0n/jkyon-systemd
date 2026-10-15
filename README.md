@@ -18,7 +18,7 @@ jkyon-systemd/
   ├── gentoo/ # específico de distro, qualquer máquina Gentoo
   │   ├── root/
   │   └── user/
-  ├── arch/ # específico de distro, qualquer máquina Arch (ainda vazio)
+  ├── arch/ # específico de distro, qualquer máquina Arch
   │   ├── root/
   │   └── user/
   └── machines/ # específico de UMA máquina só (ainda vazio)

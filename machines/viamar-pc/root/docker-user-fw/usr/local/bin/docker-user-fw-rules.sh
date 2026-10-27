@@ -9,16 +9,22 @@
 # Disparado via ExecStartPost do docker.service (drop-in, não mexe na unit
 # package-owned) — roda de novo em todo start do dockerd, já que a chain é
 # recriada vazia a cada boot (regras nftables não persistem por padrão).
+#
+# Usa iptables/ip6tables (não nft direto) desde 2026-10-27: o Docker cria a
+# DOCKER-USER pelo backend do iptables do sistema. No Arch ele é nft, mas no
+# Gentoo veio legacy (xtables-legacy), e aí `nft ... ip filter DOCKER-USER` não
+# acha a chain, o script falha e derruba o docker.service. O iptables funciona
+# nos dois backends.
 set -euo pipefail
 
-nft flush chain ip filter DOCKER-USER 2>/dev/null || true
-nft flush chain ip6 filter DOCKER-USER 2>/dev/null || true
+iptables -F DOCKER-USER 2>/dev/null || true
+ip6tables -F DOCKER-USER 2>/dev/null || true
 
 # borg-ui (porta 8081) — só Tailscale (100.64.0.0/10) + LAN do escritório (192.168.5.0/24)
-nft add rule ip filter DOCKER-USER ip saddr 100.64.0.0/10 tcp dport 8081 accept
-nft add rule ip filter DOCKER-USER ip saddr 192.168.5.0/24 tcp dport 8081 accept
-nft add rule ip filter DOCKER-USER tcp dport 8081 counter drop
+iptables -A DOCKER-USER -s 100.64.0.0/10 -p tcp --dport 8081 -j ACCEPT
+iptables -A DOCKER-USER -s 192.168.5.0/24 -p tcp --dport 8081 -j ACCEPT
+iptables -A DOCKER-USER -p tcp --dport 8081 -j DROP
 
 # equivalente IPv6 (Tailscale v6)
-nft add rule ip6 filter DOCKER-USER ip6 saddr fd7a:115c:a1e0::/48 tcp dport 8081 accept 2>/dev/null || true
-nft add rule ip6 filter DOCKER-USER tcp dport 8081 counter drop 2>/dev/null || true
+ip6tables -A DOCKER-USER -s fd7a:115c:a1e0::/48 -p tcp --dport 8081 -j ACCEPT 2>/dev/null || true
+ip6tables -A DOCKER-USER -p tcp --dport 8081 -j DROP 2>/dev/null || true

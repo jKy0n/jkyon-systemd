@@ -1,0 +1,9 @@
+# Ativação D-Bus do KDE Connect delegada à unit niri-kdeconnectd (2026-10-27).
+# Sem isto, quem chama o org.kde.kdeconnect antes da unit subir (ex.: o plugin
+# do noctalia na barra) faz o dbus-daemon iniciar o kdeconnectd por conta própria,
+# fora do systemd e sem o Restart=on-failure. Tem prioridade sobre o arquivo do
+# pacote em /usr/share/dbus-1/services/.
+[D-BUS Service]
+Name=org.kde.kdeconnect
+Exec=/usr/bin/kdeconnectd
+SystemdService=niri-kdeconnectd.service

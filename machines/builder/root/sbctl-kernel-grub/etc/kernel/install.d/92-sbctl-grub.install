@@ -1,0 +1,32 @@
+#!/bin/sh
+# Builder: assina com o sbctl (Secure Boot, chaves próprias) o kernel que o
+# installkernel (layout "grub") copia pra /boot/kernel-<versão> no 90-compat.
+#
+# Por que não o 91-sbctl.install do pacote: ele assume o layout BLS e assina
+# $ENTRY_DIR/linux, que não existe no layout grub (falharia a instalação do
+# kernel). Ele está mascarado aqui ao lado (91-sbctl.install -> /dev/null).
+# O gentoo-kernel-bin não tem USE=secureboot (só o gentoo-kernel da fonte).
+#
+# "sign -s" guarda o arquivo no banco do sbctl (sbctl list-files / sign-all).
+
+COMMAND="$1"
+KERNEL_VERSION="$2"
+IMAGE="/boot/kernel-$KERNEL_VERSION"
+
+case "$COMMAND" in
+add)
+	if ! [ "$(sbctl setup --print-state --json | awk '/installed/ { gsub(/,$/,"",$2); print $2 }')" = "true" ]; then
+		echo "sbctl-grub: sem chaves do sbctl, kernel não assinado"
+		exit 0
+	fi
+	if ! [ -f "$IMAGE" ]; then
+		echo "sbctl-grub: $IMAGE não existe" >&2
+		exit 1
+	fi
+	sbctl sign -s "$IMAGE" >/dev/null || exit 1
+	echo "sbctl-grub: kernel assinado ($IMAGE)"
+	;;
+remove)
+	sbctl remove-file "$IMAGE" >/dev/null 2>&1 || :
+	;;
+esac

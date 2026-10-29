@@ -20,4 +20,10 @@ if ! mount -t overlay snapshot-overlay \
     umount "$base/lower"
     return 0
 fi
+
+# overlay não aceita remount ("No changes allowed in reconfigure"): mascara o
+# systemd-remount-fs só neste boot (o /run vai junto pro sistema e some no reboot)
+mkdir -p /run/systemd/system
+ln -sf /dev/null /run/systemd/system/systemd-remount-fs.service
+
 info "rd.snapshot.overlay: snapshot com overlay gravável em RAM ($base/upper)"

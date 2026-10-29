@@ -20,9 +20,9 @@ set -euo pipefail
 iptables -F DOCKER-USER 2>/dev/null || true
 ip6tables -F DOCKER-USER 2>/dev/null || true
 
-# borg-ui (porta 8081) — só Tailscale (100.64.0.0/10) + LAN do escritório (192.168.5.0/24)
+# borg-ui (porta 8081) — só Tailscale (100.64.0.0/10) + LAN do escritório (192.168.15.0/24)
 iptables -A DOCKER-USER -s 100.64.0.0/10 -p tcp --dport 8081 -j ACCEPT
-iptables -A DOCKER-USER -s 192.168.5.0/24 -p tcp --dport 8081 -j ACCEPT
+iptables -A DOCKER-USER -s 192.168.15.0/24 -p tcp --dport 8081 -j ACCEPT
 iptables -A DOCKER-USER -p tcp --dport 8081 -j DROP
 
 # equivalente IPv6 (Tailscale v6)

@@ -4,7 +4,9 @@
 #
 # Por que não o 91-sbctl.install do pacote: ele assume o layout BLS e assina
 # $ENTRY_DIR/linux, que não existe no layout grub (falharia a instalação do
-# kernel). Ele está mascarado aqui ao lado (91-sbctl.install -> /dev/null).
+# kernel). Ele está mascarado aqui ao lado: 91-sbctl.install vazio (o
+# kernel-install trata arquivo vazio ou link pra /dev/null como máscara; o stow
+# não aceita link absoluto).
 # O gentoo-kernel-bin não tem USE=secureboot (só o gentoo-kernel da fonte).
 #
 # "sign -s" guarda o arquivo no banco do sbctl (sbctl list-files / sign-all).

@@ -8,13 +8,16 @@ if [ "$(btrfs property get -ts "$NEWROOT" ro 2> /dev/null)" != "ro=true" ]; then
     return 0
 fi
 
+# bind + overlay por cima (e não mount --move): no initramfs com systemd o
+# /sysroot fica sob uma montagem compartilhada, e o kernel recusa o --move
+# ("moving a mount residing under a shared mount is unsupported").
 base=/run/snapshot-overlay
 mkdir -p "$base/lower" "$base/upper" "$base/work"
-mount --move "$NEWROOT" "$base/lower" || return 0
+mount --bind "$NEWROOT" "$base/lower" || return 0
 if ! mount -t overlay snapshot-overlay \
     -o "lowerdir=$base/lower,upperdir=$base/upper,workdir=$base/work" "$NEWROOT"; then
     warn "rd.snapshot.overlay: falha ao montar o overlay, seguindo read-only"
-    mount --move "$base/lower" "$NEWROOT"
+    umount "$base/lower"
     return 0
 fi
 info "rd.snapshot.overlay: snapshot com overlay gravável em RAM ($base/upper)"

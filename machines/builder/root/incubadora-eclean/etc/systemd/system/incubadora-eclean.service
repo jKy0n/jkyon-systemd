@@ -1,0 +1,20 @@
+# Builder: limpeza mensal da incubadora de binpkgs do Viamar-PC.
+# --deep --time-limit=60d: apaga só o que NÃO está instalado na incubadora E tem
+# mais de 60 dias. Sem o time-limit, o --deep apagaria as versões anteriores
+# (rollback, binpkg-multi-instance) logo depois de cada atualização.
+# Vale pros binpkgs próprios (/var/cache/binpkgs), pro cache do binhost oficial
+# (/var/cache/binhost) e pros distfiles (rebaixáveis). No fim, o emaint refaz o
+# índice Packages servido pelo nginx (sem isso, cliente pediria arquivo apagado).
+# Se um emerge estiver rodando na incubadora, o nspawn recusa (chroot ocupado) e
+# o notify-failure avisa: rodar de novo depois.
+[Unit]
+Description=Limpeza da incubadora de binpkgs (viamar-pc), 60 dias de rollback
+OnFailure=notify-failure@%N.service
+
+[Service]
+Type=oneshot
+Nice=19
+IOSchedulingClass=idle
+ExecStart=/usr/bin/systemd-nspawn -q -D /var/lib/incubator/viamar-pc \
+    --bind-ro=/var/db/repos/gentoo --bind-ro=/var/db/repos/guru --bind-ro=/var/db/repos/jkyon-overlay \
+    /bin/sh -c 'mkdir -p /run/lock && eclean-pkg --deep --time-limit=60d && eclean-dist --deep --time-limit=60d && emaint binhost --fix'

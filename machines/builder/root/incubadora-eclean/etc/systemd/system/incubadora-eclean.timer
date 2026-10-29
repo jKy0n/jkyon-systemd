@@ -1,0 +1,10 @@
+# Mensal, dia 1 às 04:00 (longe do sync das 15:30 e das atualizações do dia).
+[Unit]
+Description=Limpeza mensal da incubadora de binpkgs
+
+[Timer]
+OnCalendar=*-*-01 04:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=Confere o desbloqueio remoto do LUKS (dropbear no initramfs)
+Documentation=file:///usr/local/bin/check-initramfs-ssh.sh
+# o ip= é comparado com os IPs da máquina: esperar a rede
+Wants=network-online.target
+After=network-online.target
+OnFailure=notify-failure@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/check-initramfs-ssh.sh
+
+[Install]
+WantedBy=multi-user.target

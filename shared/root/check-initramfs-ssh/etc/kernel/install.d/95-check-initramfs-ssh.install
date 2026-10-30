@@ -1,0 +1,7 @@
+#!/bin/sh
+# Kernel novo (installkernel/kernel-install): depois do dracut (52) e do
+# grub-mkconfig (91), confere o initramfs pela unit (falha -> notify-failure).
+# Nunca bloqueia a instalação do kernel.
+[ "$1" = add ] || exit 0
+systemctl start --no-block check-initramfs-ssh.service 2>/dev/null || true
+exit 0

@@ -2,11 +2,15 @@
 # Monta o GRUB que roda atrás do shim (Secure Boot) e assina com as chaves do sbctl.
 #
 # Por que não a imagem do USE=secureboot do Gentoo: com SB ligado o GRUB 2.14 entra
-# em lockdown e o verificador do shim recusa QUALQUER módulo carregado depois (disco
-# ou memdisk) e qualquer fonte ("prohibited by secure boot policy"). Então todo módulo
-# que o grub.cfg usa tem que estar no core (--modules), e o grub.cfg não pode carregar
-# fonte/tema (GRUB_TERMINAL_OUTPUT=console no /etc/default/grub).
-# Ao acrescentar um "insmod" novo no grub.cfg, acrescentar o módulo em MODULES.
+# em lockdown e o verificador do shim recusa módulo e fonte lidos do DISCO
+# ("prohibited by secure boot policy"). Arquivo lido do MEMDISK pula a verificação
+# (grub-core/kern/verifiers.c), então tudo que não é kernel/initrd/config vai aqui
+# dentro: módulos (o grub-mkstandalone já põe todos no memdisk; os de MODULES ficam
+# também no core), a fonte unicode (padrão do --fonts) e o tema.
+#
+# Tema: Xenlism-Gentoo (o mesmo da TheseusMachine e do Builder), embutido a partir de
+# /boot/grub/themes/$THEME e carregado pela config embutida abaixo (o grub-mkconfig só
+# gera caminho de disco, por isso o GRUB_THEME fica comentado no /etc/default/grub).
 #
 # Cadeia: firmware -> shimx64.efi (Microsoft) -> grubx64.efi (este, db próprio)
 #         -> kernel (db próprio, 92-sbctl-compat.install). Initramfs não é verificado.
@@ -14,29 +18,51 @@ set -eu
 
 ESP_DIR=/boot/efi/EFI/Gentoo-SB
 BOOT_UUID=caea7432-27f4-4123-8f40-02685a3b6ec8   # /boot (ext4, nvme1n1p2)
+THEME=Xenlism-Gentoo
+THEME_SRC=/boot/grub/themes/$THEME
+THEME_MD="(memdisk)/boot/grub/themes/$THEME"
 MODULES="part_gpt part_msdos ext2 btrfs fat search search_fs_uuid search_label
 normal configfile linux gzio echo test all_video efi_gop efi_uga video_bochs
 video_cirrus gettext bli loadenv probe regexp sleep reboot halt true minicmd
-efifwsetup"
+efifwsetup font gfxterm gfxterm_background gfxmenu png jpeg video"
+
+[ -f "$THEME_SRC/theme.txt" ] || { echo "grub-sb-build: falta $THEME_SRC/theme.txt" >&2; exit 1; }
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
-# Config embutida: só acha o /boot e carrega o grub.cfg real. Não mexe no prefix.
-cat > "$tmp/grub.cfg" <<EOF
-search --no-floppy --fs-uuid --set=root $BOOT_UUID
-configfile (\$root)/grub/grub.cfg
-EOF
+# Config embutida: carrega o tema do memdisk, acha o /boot e lê o grub.cfg real.
+# Não mexe no prefix (continua no memdisk: módulos, fonts/unicode.pf2, locale).
+{
+	echo "insmod all_video"
+	echo "insmod gfxterm"
+	echo "insmod gfxmenu"
+	echo "insmod png"
+	for f in "$THEME_SRC"/*.pf2; do
+		echo "loadfont $THEME_MD/${f##*/}"
+	done
+	echo "set theme=$THEME_MD/theme.txt"
+	echo "export theme"
+	echo "search --no-floppy --fs-uuid --set=root $BOOT_UUID"
+	echo 'configfile ($root)/grub/grub.cfg'
+} > "$tmp/grub.cfg"
+
+# Um enxerto (destino=origem) por arquivo do tema.
+set --
+for f in $(cd "$THEME_SRC" && find . -type f | sed 's|^\./||' | sort); do
+	set -- "$@" "boot/grub/themes/$THEME/$f=$THEME_SRC/$f"
+done
 
 grub-mkstandalone -O x86_64-efi \
 	--sbat /usr/share/grub/sbat.csv \
 	--modules="$(echo $MODULES)" \
 	-o "$tmp/grubx64.efi" \
-	"boot/grub/grub.cfg=$tmp/grub.cfg"
+	"boot/grub/grub.cfg=$tmp/grub.cfg" \
+	"$@"
 
 mkdir -p "$ESP_DIR"
 cp /usr/share/shim/BOOTX64.EFI "$ESP_DIR/shimx64.efi"
 cp /usr/share/shim/mmx64.efi "$ESP_DIR/mmx64.efi"
 cp "$tmp/grubx64.efi" "$ESP_DIR/grubx64.efi"
 sbctl sign -s "$ESP_DIR/grubx64.efi"
-echo "grub-sb-build: $ESP_DIR atualizado (shim + GRUB assinado)."
+echo "grub-sb-build: $ESP_DIR atualizado (shim + GRUB assinado, tema $THEME)."

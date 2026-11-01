@@ -17,6 +17,9 @@
 #
 # Cadeia: firmware (db próprio + Microsoft) -> grubx64.efi (este) -> kernel
 # (92-sbctl-compat.install). Initramfs e grub.cfg não são verificados.
+# --disable-shim-lock: sem shim, o verificador shim_lock recusa o kernel com SB
+# ligado ("shim protocols not found", 2026-11-01); sem ele o GRUB passa o kernel
+# pro LoadImage do firmware, que confere a assinatura contra o db (igual ao Builder).
 set -eu
 
 ESP_DIR=/efi/EFI/Gentoo-SB
@@ -62,6 +65,7 @@ for f in $(cd "$THEME_SRC" && find . -type f | sed 's|^\./||' | sort); do
 done
 
 grub-mkstandalone -O x86_64-efi \
+	--disable-shim-lock \
 	--sbat /usr/share/grub/sbat.csv \
 	--modules="$(echo $MODULES)" \
 	-o "$tmp/grubx64.efi" \

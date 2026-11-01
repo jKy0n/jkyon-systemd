@@ -36,6 +36,9 @@ trap 'rm -rf "$tmp"' EXIT
 
 # Config embutida: carrega o tema do memdisk, acha o /boot e lê o grub.cfg real.
 # Não mexe no prefix (continua no memdisk: módulos, fonts/unicode.pf2, locale).
+# env_block: o GRUB_SAVEDEFAULT grava saved_entry em $prefix/grubenv, que no
+# memdisk não existe ("grubenv not found" a cada boot). O 00_header do grub.cfg
+# usa o env_block quando ele existe, prefixando o $root (o /boot achado aqui).
 {
 	echo "insmod all_video"
 	echo "insmod gfxterm"
@@ -47,6 +50,8 @@ trap 'rm -rf "$tmp"' EXIT
 	echo "set theme=$THEME_MD/theme.txt"
 	echo "export theme"
 	echo "search --no-floppy --fs-uuid --set=root $BOOT_UUID"
+	echo "set env_block=/grub/grubenv"
+	echo "export env_block"
 	echo 'configfile ($root)/grub/grub.cfg'
 } > "$tmp/grub.cfg"
 

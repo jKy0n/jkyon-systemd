@@ -1,0 +1,21 @@
+#!/bin/sh
+# Assina o kernel com as chaves do sbctl no layout "compat" do installkernel
+# (/boot/kernel-<versão>, carregado pelo GRUB). O 91-sbctl.install do pacote
+# assina $ENTRY_DIR_ABS/linux (layout BLS/systemd-boot), que não existe aqui,
+# e por isso está mascarado (link pra /dev/null neste mesmo pacote).
+# Roda depois do 90-compat.install, que copia o kernel pro /boot.
+
+COMMAND="$1"
+KERNEL_VERSION="$2"
+IMAGE_FILE="/boot/kernel-$KERNEL_VERSION"
+
+case "$COMMAND" in
+add)
+	[ -f "$IMAGE_FILE" ] || { echo "sbctl-compat: $IMAGE_FILE não existe" >&2; exit 1; }
+	echo "sbctl-compat: assinando $IMAGE_FILE"
+	sbctl sign -s "$IMAGE_FILE"
+	;;
+remove)
+	sbctl remove-file "$IMAGE_FILE" >/dev/null 2>&1 || :
+	;;
+esac

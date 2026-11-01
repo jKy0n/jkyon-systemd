@@ -1,0 +1,69 @@
+#!/bin/sh
+# Monta o GRUB do Secure Boot da TheseusMachine e assina com as chaves do sbctl.
+# Adaptado do grub-sb-build do Viamar-PC, mas SEM shim: as chaves do sbctl estão
+# no db do firmware (sbctl enroll-keys -m, receita do Builder), então o firmware
+# carrega este grubx64.efi direto.
+#
+# Por que memdisk: com SB ligado o GRUB 2.14 entra em lockdown e recusa módulo e
+# fonte lidos do DISCO ("prohibited by secure boot policy"). Arquivo lido do
+# MEMDISK pula a verificação (grub-core/kern/verifiers.c), então tudo que não é
+# kernel/initrd/config vai aqui dentro: módulos (o grub-mkstandalone põe todos no
+# memdisk; os de MODULES ficam também no core), a fonte unicode e o tema.
+#
+# Tema: Xenlism-Gentoo, embutido a partir de /boot/grub/themes/$THEME e carregado
+# pela config embutida abaixo (o grub-mkconfig só gera caminho de disco, por isso o
+# GRUB_THEME fica comentado no /etc/default/grub). Rodar de novo depois de mexer
+# no tema ou de atualizar o sys-boot/grub.
+#
+# Cadeia: firmware (db próprio + Microsoft) -> grubx64.efi (este) -> kernel
+# (92-sbctl-compat.install). Initramfs e grub.cfg não são verificados.
+set -eu
+
+ESP_DIR=/efi/EFI/Gentoo-SB
+BOOT_UUID=2620b663-8d97-4a0e-9cdd-79c4fdfea0d8   # /boot (ext4, nvme0n1p2)
+THEME=Xenlism-Gentoo
+THEME_SRC=/boot/grub/themes/$THEME
+THEME_MD="(memdisk)/boot/grub/themes/$THEME"
+MODULES="part_gpt part_msdos ext2 btrfs fat search search_fs_uuid search_label
+normal configfile linux gzio echo test all_video efi_gop efi_uga video_bochs
+video_cirrus gettext bli loadenv probe regexp sleep reboot halt true minicmd
+efifwsetup font gfxterm gfxterm_background gfxmenu png jpeg video"
+
+[ -f "$THEME_SRC/theme.txt" ] || { echo "grub-sb-build: falta $THEME_SRC/theme.txt" >&2; exit 1; }
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+# Config embutida: carrega o tema do memdisk, acha o /boot e lê o grub.cfg real.
+# Não mexe no prefix (continua no memdisk: módulos, fonts/unicode.pf2, locale).
+{
+	echo "insmod all_video"
+	echo "insmod gfxterm"
+	echo "insmod gfxmenu"
+	echo "insmod png"
+	for f in "$THEME_SRC"/*.pf2; do
+		echo "loadfont $THEME_MD/${f##*/}"
+	done
+	echo "set theme=$THEME_MD/theme.txt"
+	echo "export theme"
+	echo "search --no-floppy --fs-uuid --set=root $BOOT_UUID"
+	echo 'configfile ($root)/grub/grub.cfg'
+} > "$tmp/grub.cfg"
+
+# Um enxerto (destino=origem) por arquivo do tema.
+set --
+for f in $(cd "$THEME_SRC" && find . -type f | sed 's|^\./||' | sort); do
+	set -- "$@" "boot/grub/themes/$THEME/$f=$THEME_SRC/$f"
+done
+
+grub-mkstandalone -O x86_64-efi \
+	--sbat /usr/share/grub/sbat.csv \
+	--modules="$(echo $MODULES)" \
+	-o "$tmp/grubx64.efi" \
+	"boot/grub/grub.cfg=$tmp/grub.cfg" \
+	"$@"
+
+mkdir -p "$ESP_DIR"
+cp "$tmp/grubx64.efi" "$ESP_DIR/grubx64.efi"
+sbctl sign -s "$ESP_DIR/grubx64.efi"
+echo "grub-sb-build: $ESP_DIR/grubx64.efi atualizado e assinado (tema $THEME)."

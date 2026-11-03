@@ -15,6 +15,8 @@ OnFailure=notify-failure@%N.service
 Type=oneshot
 Nice=19
 IOSchedulingClass=idle
-ExecStart=/usr/bin/systemd-nspawn -q -D /var/lib/incubator/viamar-pc \
+# --restrict-address-families= vazio: sem restrição, explícito (aviso do systemd 261,
+# mesmo motivo do incubadora.sh)
+ExecStart=/usr/bin/systemd-nspawn -q -D /var/lib/incubator/viamar-pc --restrict-address-families= \
     --bind-ro=/var/db/repos/gentoo --bind-ro=/var/db/repos/guru --bind-ro=/var/db/repos/jkyon-overlay \
     /bin/sh -c 'mkdir -p /run/lock && eclean-pkg --deep --time-limit=60d && eclean-dist --deep --time-limit=60d && emaint binhost --fix'

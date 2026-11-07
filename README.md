@@ -196,6 +196,8 @@ próprio link que você está tentando consertar.
 `sudoers.d` exige arquivo real, dono `root`, permissão `0440` — um symlink
 do stow (dono `jkyon`) nunca serve, independente de suporte a symlink do
 sudo. Esse é o único tipo de arquivo do projeto tratado fora do repo.
+Vale também pro `sudo-rs` (TheseusMachine desde 2026-11-06), que lê o mesmo
+diretório. Ver "Referência — sudo-rs" no `AGENTS.md` do `jkyon-ai-context`.
 
 **Setup manual, uma vez por máquina** (necessário pro hook pós-upgrade
 em `upgrade-portage.sh` não pedir senha de novo se o merge demorar mais

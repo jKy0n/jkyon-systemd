@@ -25,7 +25,8 @@ old=$(image_id)
 docker compose pull -q
 new=$(image_id)
 if [[ $new == "$old" ]]; then
-    echo "sem imagem nova ($(docker image inspect -f '{{index .Config.Labels "org.opencontainers.image.version"}}' "$IMAGE:latest"))"
+    # o label org.opencontainers.image.version só traz o minor (2.4); APP_VERSION é completo
+    echo "sem imagem nova ($(docker image inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$IMAGE:latest" | sed -n 's/^APP_VERSION=//p'))"
     exit 0
 fi
 echo "imagem nova: ${old:7:12} -> ${new:7:12}"

@@ -1,0 +1,11 @@
+[Unit]
+Description=Atualiza a imagem do borg-ui (pull + restart se mudou)
+Documentation=file:///usr/local/bin/borg-ui-autoupdate.sh
+Requires=docker.service
+Wants=network-online.target
+After=docker.service network-online.target
+OnFailure=notify-failure@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/borg-ui-autoupdate.sh

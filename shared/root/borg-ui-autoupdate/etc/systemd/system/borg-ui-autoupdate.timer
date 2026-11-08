@@ -1,0 +1,11 @@
+[Unit]
+Description=Atualização semanal do borg-ui
+
+[Timer]
+# longe dos backups (TheseusMachine: 01:00 e 09:00)
+OnCalendar=Sun *-*-* 12:00:00
+RandomizedDelaySec=10m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

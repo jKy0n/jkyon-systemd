@@ -6,6 +6,6 @@
 case "$1" in
     pre)
         ethtool -s enp6s0 wol g
-        logger "enable-wol: WOL (magic packet) reaplicado no enp6s0"
+        logger -t enable-wol "WOL (magic packet) reaplicado no enp6s0"
         ;;
 esac

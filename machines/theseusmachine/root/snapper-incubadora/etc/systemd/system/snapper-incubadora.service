@@ -1,0 +1,12 @@
+# Snapshot "timeline" de cada incubadora (/etc/snapper/configs/incubadora-*).
+# O snapper-timeline.timer do pacote é global e de hora em hora; as configs da
+# incubadora têm TIMELINE_CREATE=no e o horário vem do timer deste pacote.
+# A limpeza fica no snapper-cleanup.timer do pacote (TIMELINE_LIMIT_* das configs).
+[Unit]
+Description=Snapshots timeline das incubadoras (00h, 06h, 12h, 18h)
+RequiresMountsFor=/mnt/incubadora
+OnFailure=notify-failure@%N.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'rc=0; for f in /etc/snapper/configs/incubadora-*; do snapper -c "$${f##*/}" create -c timeline -d timeline || rc=1; done; exit $$rc'

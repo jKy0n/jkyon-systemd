@@ -27,8 +27,9 @@ BOOT_UUID=2620b663-8d97-4a0e-9cdd-79c4fdfea0d8   # /boot (ext4, nvme0n1p2)
 THEME=Xenlism-Gentoo
 THEME_SRC=/boot/grub/themes/$THEME
 THEME_MD="(memdisk)/boot/grub/themes/$THEME"
+# efi_uga saiu da lista em 2026-11-13: o GRUB 2.16 não tem mais o módulo (só GOP).
 MODULES="part_gpt part_msdos ext2 btrfs fat search search_fs_uuid search_label
-normal configfile linux gzio echo test all_video efi_gop efi_uga video_bochs
+normal configfile linux gzio echo test all_video efi_gop video_bochs
 video_cirrus gettext bli loadenv probe regexp sleep reboot halt true minicmd
 efifwsetup font gfxterm gfxterm_background gfxmenu png jpeg video"
 

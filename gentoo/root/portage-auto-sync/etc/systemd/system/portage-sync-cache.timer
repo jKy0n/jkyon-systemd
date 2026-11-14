@@ -1,9 +1,11 @@
+# Todo dia 17:30 (2026-11-14; antes 16:30 útil / 10:00 fds): as atualizações são feitas
+# à noite, em casa, com a TheseusMachine por perto. A TheseusMachine é o mirror do repo
+# gentoo do parque e tem override pras 17:00 (pacote portage-sync-schedule dela).
 [Unit]
 Description=Timer B - sync diario do Portage
 
 [Timer]
-OnCalendar=Mon..Fri 16:30
-OnCalendar=Sat,Sun 10:00
+OnCalendar=*-*-* 17:30
 Persistent=yes
 
 [Install]

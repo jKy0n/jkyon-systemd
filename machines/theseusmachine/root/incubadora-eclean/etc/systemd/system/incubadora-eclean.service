@@ -1,0 +1,21 @@
+# TheseusMachine: limpeza mensal das incubadoras de binpkgs (um chroot por alvo em
+# /mnt/incubadora, via incubadora.sh). Veio do Builder em 2026-11-14.
+# eclean-pkg --deep --time-limit=60d: apaga só o binpkg que NÃO está instalado no
+# chroot E tem mais de 60 dias. Sem o time-limit, o --deep apagaria as versões
+# anteriores (rollback, binpkg-multi-instance) logo depois de cada atualização.
+# eclean-dist SEM --deep: o /mnt/incubadora/distfiles é compartilhado entre os
+# chroots, e o --deep de um apagaria tarball que só o outro usa. Sem ele, sai só o
+# que nenhum ebuild da árvore usa mais (vale pros dois).
+# No fim, o emaint refaz o índice Packages servido pelo nginx (sem isso, o cliente
+# pediria arquivo apagado). Se um emerge estiver rodando num chroot, o nspawn recusa
+# (chroot ocupado), aquele alvo falha e o notify-failure avisa: rodar de novo depois.
+[Unit]
+Description=Limpeza das incubadoras de binpkgs, 60 dias de rollback
+RequiresMountsFor=/mnt/incubadora
+OnFailure=notify-failure@%N.service
+
+[Service]
+Type=oneshot
+Nice=19
+IOSchedulingClass=idle
+ExecStart=/bin/sh -c 'rc=0; for c in /mnt/incubadora/*/etc/portage; do t=$${c%%/etc/portage}; t=$${t##*/}; echo "== $$t"; /home/jkyon/ShellScript/TheseusMachine/scripts/incubadora/incubadora.sh "$$t" sh -c "eclean-pkg --deep --time-limit=60d && eclean-dist && emaint binhost --fix" || rc=1; done; exit $$rc'

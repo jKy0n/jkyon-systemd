@@ -1,0 +1,10 @@
+[Unit]
+Description=Vigia da TheseusMachine (Grafana dos alertas do parque) via ntfy
+Documentation=file:///usr/local/bin/theseus-watchdog.sh
+Wants=network-online.target
+After=network-online.target tailscaled.service
+OnFailure=notify-failure@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/theseus-watchdog.sh

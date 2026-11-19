@@ -15,10 +15,12 @@ ICON="/usr/share/icons/Papirus/48x48/status/dialog-error.svg"
 NTFY_CONF="/etc/notify-failure/ntfy.conf"
 
 sent=0
+tried=0
 
 # Canal desktop: notify-send no D-Bus da sessão gráfica. Pulado sem sessão
 # (headless, ex.: Builder) em vez de falhar.
 if [[ -S "${XDG_RUNTIME_DIR}/bus" ]] && command -v notify-send >/dev/null 2>&1; then
+    tried=1
     runuser -u "$TARGET_USER" -- \
         env XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" \
             DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
@@ -31,6 +33,7 @@ fi
 if [[ -r "$NTFY_CONF" ]]; then
     # shellcheck source=/dev/null
     . "$NTFY_CONF"
+    tried=1
     curl -fsS --max-time 15 \
         -H "Title: Falha: ${FAILED_UNIT} ($(uname -n))" \
         -H "Priority: high" \
@@ -38,6 +41,14 @@ if [[ -r "$NTFY_CONF" ]]; then
         -d "Rode: journalctl -u ${FAILED_UNIT} -e" \
         "${NTFY_URL:?NTFY_URL ausente em $NTFY_CONF}" >/dev/null \
         && sent=1
+fi
+
+# Sem canal nenhum (headless sem ntfy.conf, ex.: Builder desde 2026-11-19): o
+# celular já é avisado pelo alerta do Grafana (unit failed -> ntfy). Sair 0
+# evita que este notify-failure@ vire uma segunda unit failed e um 2º alerta.
+if (( ! tried )); then
+    echo "Sem canal local pra ${FAILED_UNIT} (sem sessão gráfica nem ntfy.conf); o alerta do Grafana cobre"
+    exit 0
 fi
 
 if (( ! sent )); then

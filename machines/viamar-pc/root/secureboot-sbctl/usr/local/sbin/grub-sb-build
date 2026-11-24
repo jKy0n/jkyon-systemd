@@ -13,7 +13,7 @@
 # gera caminho de disco, por isso o GRUB_THEME fica comentado no /etc/default/grub).
 #
 # Cadeia: firmware -> shimx64.efi (Microsoft) -> grubx64.efi (este, db próprio)
-#         -> kernel (db próprio, 92-sbctl-compat.install). Initramfs não é verificado.
+#         -> kernel (db próprio, 92-sbctl-kernel.install, shared/root/sbctl-kernel-sign). Initramfs não é verificado.
 set -eu
 
 ESP_DIR=/boot/efi/EFI/Gentoo-SB

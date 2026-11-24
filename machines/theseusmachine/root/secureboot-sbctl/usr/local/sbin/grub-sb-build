@@ -16,7 +16,7 @@
 # no tema ou de atualizar o sys-boot/grub.
 #
 # Cadeia: firmware (db próprio + Microsoft) -> grubx64.efi (este) -> kernel
-# (92-sbctl-compat.install). Initramfs e grub.cfg não são verificados.
+# (92-sbctl-kernel.install, pacote shared/root/sbctl-kernel-sign). Initramfs e grub.cfg não são verificados.
 # --disable-shim-lock: sem shim, o verificador shim_lock recusa o kernel com SB
 # ligado ("shim protocols not found", 2026-11-01); sem ele o GRUB passa o kernel
 # pro LoadImage do firmware, que confere a assinatura contra o db (igual ao Builder).
